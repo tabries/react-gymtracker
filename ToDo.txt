@@ -1,0 +1,2 @@
+Move axios API calls to api.js
+Add User authentication
