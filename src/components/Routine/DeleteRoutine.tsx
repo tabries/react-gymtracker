@@ -31,7 +31,7 @@ export const DeleteRoutine = ({
   return (
     <div
       className="absolute rounded-xl shadow-xl/30 -translate-x-2/4 -translate-y-2/4 w-[400] 
-    border-2 border-solid border-black left-2/4 top-2/4 bg-white py-4 px-12"
+    border-2 border-solid border-black left-2/4 top-2/4 bg-white py-4 px-12 justify-items-center"
     >
       <button
         onClick={handleClose}
