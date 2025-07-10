@@ -25,11 +25,11 @@ export const Routine = ({ id, name }: RoutineProps) => {
     <div className="h-20 w-full px-5 bg-[#FFD7B9] flex justify-between rounded-xl">
       <button
         onClick={handleClick}
-        className="text-start text-[#474747] flex-1"
+        className="text-start text-[#474747] flex-1 cursor-pointer"
       >
         {name}
       </button>
-      <div className="content-center">
+      <div className="content-center cursor-pointer">
         <DeleteOutlineIcon onClick={handleOpenDelete} />
       </div>
 

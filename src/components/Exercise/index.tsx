@@ -29,13 +29,13 @@ export const Exercise = ({ id, name }: ExerciseProps) => {
         <div className="">{name}</div>
       </div>
       <div className="content-center gap-0 flex items-center">
-        <button className="w-12">
+        <button className="w-12 cursor-pointer">
           <ChangeHistoryIcon
             onClick={handleOpenTimer}
             className="transform rotate-90"
           />
         </button>
-        <button className="w-12">
+        <button className="w-12 cursor-pointer">
           <DeleteOutlineIcon onClick={handleOpenDelete} />
         </button>
       </div>
