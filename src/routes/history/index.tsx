@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHistoryByMonth } from "@/services/api";
 import {
-  Box,
   Typography,
   CircularProgress,
   List,
@@ -45,9 +44,9 @@ export default function History() {
     enabled: !!formattedDate,
   });
 
-  const highlightedDays: number[] = historyByMonth?.map((history: History) =>
-    new Date(history.date).getDate()
-  );
+  const highlightedDays: number[] = historyByMonth?.map((history: History) => {
+    return new Date(history.date).getUTCDate();
+  });
 
   const historySelectedDay = historyByMonth?.filter(
     (history: History) =>
@@ -61,18 +60,23 @@ export default function History() {
       !props.outsideCurrentMonth &&
       highlightedDays.indexOf(props.day.getDate()) >= 0;
 
+    // console.log('0001 highlightedDays', highlightedDays)
+
     return (
-      <Badge
-        key={props.day.toString()}
-        overlap="circular"
-        badgeContent={isSelected ? "🔵" : undefined}
-      >
-        <PickersDay
-          {...other}
-          outsideCurrentMonth={outsideCurrentMonth}
-          day={day}
-        />
-      </Badge>
+      <>
+        <Badge
+          key={props.day.toString()}
+          overlap="circular"
+          badgeContent={isSelected ? "🔵" : undefined}
+          classes={{ badge: "pointer-events-none w-0 !h-0" }}
+        >
+          <PickersDay
+            {...other}
+            outsideCurrentMonth={outsideCurrentMonth}
+            day={day}
+          />
+        </Badge>
+      </>
     );
   }
 
@@ -92,41 +96,43 @@ export default function History() {
             actionBar: { actions: [] },
             day: {
               highlightedDays,
-            } as {highlightedDays: number[]},
+            } as { highlightedDays: number[] },
           }}
           slots={{
             day: ServerDay,
           }}
         />
       </LocalizationProvider>
-      <Box mt={3}>
+      <div className="justify-items-center mt-8">
         {isLoading && <CircularProgress />}
-        {error && <Typography color="error">Error loading history.</Typography>}
+        {error && <span>Error loading history.</span>}
         {historySelectedDay && historySelectedDay.length === 0 && (
           <Typography>No history for this day.</Typography>
         )}
         {historySelectedDay && historySelectedDay.length > 0 && (
-          <List>
-            {historySelectedDay.map((entry: History) => (
-              <ListItem key={entry.id}>
-                <ListItemText
-                  primary={entry.exercise_name}
-                  secondary={
-                    <>
-                      {entry.sets ? `Sets: ${entry.sets}, ` : ""}
-                      {entry.reps ? `Reps: ${entry.reps}, ` : ""}
-                      {entry.weightKg ? `Weight: ${entry.weightKg}kg, ` : ""}
-                      {entry.durationMin !== null
-                        ? `Duration: ${entry.durationMin}min, `
-                        : ""}
-                    </>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
+          <div className="justify-self-start pl-4">
+            <List>
+              {historySelectedDay.map((entry: History) => (
+                <ListItem key={entry.id}>
+                  <ListItemText
+                    primary={entry.exercise_name}
+                    secondary={
+                      <>
+                        {entry.sets ? `Sets: ${entry.sets}, ` : ""}
+                        {entry.reps ? `Reps: ${entry.reps}, ` : ""}
+                        {entry.weightKg ? `Weight: ${entry.weightKg}kg, ` : ""}
+                        {entry.durationMin !== null
+                          ? `Duration: ${entry.durationMin}min, `
+                          : ""}
+                      </>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </div>
         )}
-      </Box>
+      </div>
     </div>
   );
 }

@@ -57,8 +57,8 @@ export const Exercises = () => {
   if (error) return <div>Error fetching routines</div>;
 
   return (
-    <div className="h-full flex flex-col justify-between">
-      <div className="overflow-scroll h-full font-roboto font-bold">
+    <div className="h-full w-[98%] flex flex-col justify-between">
+      <div className="overflow-auto h-full font-roboto font-bold">
         <h1 className="text-center pb-4 font-oswald text-3xl font-bold">
           <span className="text-blue-primary mr-2">{routineName}</span>
           <span>exercises</span>
