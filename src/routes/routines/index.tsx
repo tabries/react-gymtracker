@@ -12,17 +12,6 @@ interface Routine {
 }
 
 export const Routines = () => {
-  // const routines = [
-  //   { id: 1, name: "routine 1" },
-  //   { id: 2, name: "routine 2" },
-  //   { id: 3, name: "routine 3" },
-  //   { id: 4, name: "routine 1" },
-  //   { id: 5, name: "routine 2" },
-  //   { id: 6, name: "routine 3" },
-  //   { id: 7, name: "routine 1" },
-  //   { id: 8, name: "routine 2" },
-  //   { id: 9, name: "routine 3" },
-  // ];
 
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,8 +50,8 @@ export const Routines = () => {
 
   return (
     <div className="h-full flex flex-col justify-between">
-      <div className="overflow-scroll h-full">
-        <h1 className="text-center pb-4 font-bold">Routines</h1>
+      <div className="overflow-scroll h-full font-roboto font-bold">
+        <h1 className="text-center pb-4 font-oswald text-3xl font-bold">Routines</h1>
         {routines.length > 0 ? (
           <div className="flex flex-col gap-2">
             {routines.map((routine) => (
@@ -80,7 +69,7 @@ export const Routines = () => {
           <AddCircleOutlineIcon
             onClick={handleOpen}
             fontSize="large"
-            className="transform rotate-90"
+            className="transform rotate-90 cursor-pointer"
           />
         </button>
       </div>

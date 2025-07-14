@@ -24,18 +24,18 @@ export const Exercise = ({ id, name }: ExerciseProps) => {
   time.setSeconds(time.getSeconds() + 600); // 10 minutes timer
 
   return (
-    <div className="h-20 w-full pl-5 pr-4 bg-[#D0E7E2] flex justify-between rounded-xl">
-      <div className="content-center text-[#474747]">
+    <div className="h-20 w-full pl-5 pr-4 bg-blue-secondary flex justify-between rounded-xl">
+      <div className="content-center text-white">
         <div className="">{name}</div>
       </div>
       <div className="content-center gap-0 flex items-center">
-        <button className="w-12 cursor-pointer">
+        <button className="w-12 text-white cursor-pointer">
           <ChangeHistoryIcon
             onClick={handleOpenTimer}
             className="transform rotate-90"
           />
         </button>
-        <button className="w-12 cursor-pointer">
+        <button className="w-12 text-white cursor-pointer">
           <DeleteOutlineIcon onClick={handleOpenDelete} />
         </button>
       </div>

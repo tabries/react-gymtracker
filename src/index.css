@@ -4,10 +4,17 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Roboto";
+  src: url("./assets/fonts/Roboto-VariableFont_wdth,wght.ttf") format("truetype");
+  font-display: swap;
+}
+
 @theme {
   --font-oswald: 'Oswald', 'sans-serif';
+  --font-roboto: 'Roboto', 'sans-serif';
 }
 
 @import "tailwindcss";
 
-
+@config '../tailwind.config.js';

@@ -1,5 +1,8 @@
 import { useStopwatch } from "react-timer-hook";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CloseIcon from "@mui/icons-material/Close";
 import { createHistoryEntry } from "@/services/api";
 import { useState } from "react";
@@ -17,18 +20,11 @@ const Timer = ({
   const [sets, setSets] = useState("");
   const [reps, setReps] = useState("");
   const [weightKg, setWeightKg] = useState("");
-  const {
-    seconds,
-    minutes,
-    hours,
-    isRunning,
-    start,
-    pause,
-    reset,
-  } = useStopwatch({
-    autoStart: true,
-    interval: 20,
-  });
+  const { seconds, minutes, hours, isRunning, start, pause, reset } =
+    useStopwatch({
+      autoStart: true,
+      interval: 20,
+    });
 
   const handleExerciseHistory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,22 +56,22 @@ const Timer = ({
         <span>{String(seconds).padStart(2, "0")}</span>
       </div>
       <p>{isRunning ? "Set in progress" : "Set paused"}</p>
-      <div className="flex flex-col mt-5 gap-8">
+      <div className="flex flex-col mt-5 gap-6">
         <div className="flex gap-4 justify-center">
-          <button onClick={start} className="bg-[#7fbfff] rounded-xl w-20">
-            Start
+          <button onClick={start} className="cursor-pointer">
+            <PlayCircleOutlineIcon fontSize="large" />
           </button>
-          <button onClick={pause} className="bg-[#7fbfff] rounded-xl w-20">
-            Pause
+          <button onClick={pause} className="cursor-pointer">
+            <PauseCircleOutlineIcon fontSize="large" />
           </button>
           <button
-            className="bg-[#7fbfff] rounded-xl w-20"
+            className="cursor-pointer"
             onClick={() => {
               const time = new Date();
               reset(time, false);
             }}
           >
-            Restart
+            <RestartAltIcon fontSize="large" />
           </button>
         </div>
         <form
@@ -104,18 +100,18 @@ const Timer = ({
             size="small"
           />
           {error && <Typography color="error">{error}</Typography>}
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4 justify-center mt-4 text-white">
             <button
               type="submit"
-              className="bg-[#9dffad] rounded-xl w-24 h-8"
+              className="bg-[#03A6A1] rounded-xl w-24 h-8 flex items-center justify-center gap-1"
               disabled={loading}
             >
-              <CheckCircleOutlineIcon /> Done
+              <CheckCircleOutlineIcon /> <span>Done</span>
             </button>
             <button
               type="button"
               onClick={handleClose}
-              className="bg-[#ffd4d4] rounded-xl w-24 h-8"
+              className="bg-[#EA2F14] rounded-xl w-24 h-8"
               disabled={loading}
             >
               Cancel
@@ -139,7 +135,7 @@ export const ExerciseTimer = ({
   return (
     <div
       className="absolute rounded-xl shadow-xl/30 -translate-x-2/4 -translate-y-2/4 w-[400] 
-    border-2 border-solid border-black left-2/4 top-2/4 bg-white py-4 px-12"
+    border-2 border-solid border-black left-2/4 top-2/4 bg-white py-4 px-12 font-roboto"
     >
       <button
         onClick={handleClose}
@@ -147,7 +143,9 @@ export const ExerciseTimer = ({
       >
         <CloseIcon />
       </button>
-      <h1 className="text-[20px] text-center">{exerciseName}</h1>
+      <h1 className="text-center font-oswald text-[36px] font-bold">
+        {exerciseName}
+      </h1>
       <Timer handleClose={handleClose} exerciseId={exerciseId} />
     </div>
   );

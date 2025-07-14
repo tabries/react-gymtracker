@@ -32,5 +32,6 @@ export const createHistoryEntry = (historyData) => api.post('history/', historyD
 export const updateHistoryEntry = (id, historyData) => api.put(`history/${id}/`, historyData);
 export const deleteHistoryEntry = (id) => api.delete(`history/${id}/`);
 export const getHistoryByDate = (date: string) => api.get(`history/by_date/?date=${date}`);
+export const getHistoryByMonth = (date: string) => api.get(`history/by_month/?date=${date}`);
 
 export default api;

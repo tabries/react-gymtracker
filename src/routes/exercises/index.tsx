@@ -19,7 +19,7 @@ interface Exercise {
 
 export const Exercises = () => {
   const location = useLocation();
-  const {id: routineId, name: routineName} = location.state; // Access the passed state object
+  const { id: routineId, name: routineName } = location.state;
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,14 +58,19 @@ export const Exercises = () => {
 
   return (
     <div className="h-full flex flex-col justify-between">
-      <div className="overflow-scroll h-full">
-        <h1 className="text-center pb-4 font-bold">
-          {routineName} Exercises
+      <div className="overflow-scroll h-full font-roboto font-bold">
+        <h1 className="text-center pb-4 font-oswald text-3xl font-bold">
+          <span className="text-blue-primary mr-2">{routineName}</span>
+          <span>exercises</span>
         </h1>
         {exercises.length > 0 ? (
           <div className="flex flex-col gap-2">
             {exercises.map((exercise) => (
-              <Exercise key={exercise.id} id={exercise.id} name={exercise.name} />
+              <Exercise
+                key={exercise.id}
+                id={exercise.id}
+                name={exercise.name}
+              />
             ))}
           </div>
         ) : (
@@ -79,7 +84,7 @@ export const Exercises = () => {
           <AddCircleOutlineIcon
             onClick={handleOpen}
             fontSize="large"
-            className="transform rotate-90"
+            className="transform rotate-90 cursor-pointer"
           />
         </button>
       </div>

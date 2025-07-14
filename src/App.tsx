@@ -16,7 +16,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <div className="flex flex-col h-screen justify-between">
-          <div className="pt-4 px-4 h-full overflow-auto">
+          <div className="pt-4 px-4 h-full overflow-auto justify-items-center">
             <Routes>
               <Route path="/auth" Component={Auth} />
               <Route path="/routines/:id/exercises" Component={Exercises} />

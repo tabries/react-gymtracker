@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getHistoryByDate } from "@/services/api";
+import { getHistoryByMonth } from "@/services/api";
 import {
   Box,
   Typography,
@@ -8,48 +8,106 @@ import {
   List,
   ListItem,
   ListItemText,
+  Badge,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-// import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
+import {
+  PickersDay,
+  type PickersDayProps,
+} from "@mui/x-date-pickers/PickersDay";
+
+interface History {
+  id: number;
+  exercise_name: string;
+  date: string;
+  sets: number;
+  reps: number;
+  weightKg: number;
+  durationMin: number;
+}
 
 export default function History() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-
-  const formattedDate = selectedDate
-    ? selectedDate.toISOString().slice(0, 10)
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(new Date());
+  const formattedDate = selectedMonth
+    ? selectedMonth.toISOString().slice(0, 10)
     : "";
 
-  const { data, isLoading, error } = useQuery({
+  const {
+    data: historyByMonth,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["history", formattedDate],
-    queryFn: () => getHistoryByDate(formattedDate).then((res) => res.data),
+    queryFn: () => getHistoryByMonth(formattedDate).then((res) => res.data),
     enabled: !!formattedDate,
   });
 
+  const highlightedDays: number[] = historyByMonth?.map((history: History) =>
+    new Date(history.date).getDate()
+  );
+
+  const historySelectedDay = historyByMonth?.filter(
+    (history: History) =>
+      new Date(history.date).getDate() === selectedDate?.getDate()
+  );
+
+  function ServerDay(props: PickersDayProps & { highlightedDays?: number[] }) {
+    const { highlightedDays = [], day, outsideCurrentMonth, ...other } = props;
+
+    const isSelected =
+      !props.outsideCurrentMonth &&
+      highlightedDays.indexOf(props.day.getDate()) >= 0;
+
+    return (
+      <Badge
+        key={props.day.toString()}
+        overlap="circular"
+        badgeContent={isSelected ? "🔵" : undefined}
+      >
+        <PickersDay
+          {...other}
+          outsideCurrentMonth={outsideCurrentMonth}
+          day={day}
+        />
+      </Badge>
+    );
+  }
+
   return (
-    <Box sx={{ maxWidth: 500, mx: "auto", mt: 4 }}>
+    <div className="max-w-xl mt-8">
       <Typography variant="h5" align="center" gutterBottom>
         History by Day
       </Typography>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <StaticDatePicker
           className="h-98"
+          onMonthChange={setSelectedMonth}
           value={selectedDate}
           onChange={setSelectedDate}
           disableFuture
-          slotProps={{ actionBar: { actions: [] } }}
+          slotProps={{
+            actionBar: { actions: [] },
+            day: {
+              highlightedDays,
+            } as {highlightedDays: number[]},
+          }}
+          slots={{
+            day: ServerDay,
+          }}
         />
       </LocalizationProvider>
       <Box mt={3}>
         {isLoading && <CircularProgress />}
         {error && <Typography color="error">Error loading history.</Typography>}
-        {data && data.length === 0 && (
+        {historySelectedDay && historySelectedDay.length === 0 && (
           <Typography>No history for this day.</Typography>
         )}
-        {data && data.length > 0 && (
+        {historySelectedDay && historySelectedDay.length > 0 && (
           <List>
-            {data.map((entry) => (
+            {historySelectedDay.map((entry: History) => (
               <ListItem key={entry.id}>
                 <ListItemText
                   primary={entry.exercise_name}
@@ -58,7 +116,9 @@ export default function History() {
                       {entry.sets ? `Sets: ${entry.sets}, ` : ""}
                       {entry.reps ? `Reps: ${entry.reps}, ` : ""}
                       {entry.weightKg ? `Weight: ${entry.weightKg}kg, ` : ""}
-                      {entry.durationMin !== null ? `Duration: ${entry.durationMin}min, ` : ""}
+                      {entry.durationMin !== null
+                        ? `Duration: ${entry.durationMin}min, `
+                        : ""}
                     </>
                   }
                 />
@@ -67,6 +127,6 @@ export default function History() {
           </List>
         )}
       </Box>
-    </Box>
+    </div>
   );
 }
