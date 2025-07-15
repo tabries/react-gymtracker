@@ -34,4 +34,9 @@ export const deleteHistoryEntry = (id) => api.delete(`history/${id}/`);
 export const getHistoryByDate = (date: string) => api.get(`history/by_date/?date=${date}`);
 export const getHistoryByMonth = (date: string) => api.get(`history/by_month/?date=${date}`);
 
+// Weight
+export const getWeights = () => api.get('weight/');
+export const createWeight = (data) => api.post('weight/', data);
+export const deleteWeight = (id) => api.delete(`weight/${id}/`);
+
 export default api;
