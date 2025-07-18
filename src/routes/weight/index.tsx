@@ -9,37 +9,19 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
   CircularProgress,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import { LineChart } from "@mui/x-charts/LineChart";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getWeights, createWeight, deleteWeight } from "@/services/api";
-import { Line } from "react-chartjs-2";
-import {
-  Chart,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-Chart.register(
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Tooltip,
-  Legend
-);
 
 interface Weight {
+  id?: number;
   date: string;
   weightKg: number;
   notes: string;
@@ -85,37 +67,16 @@ export default function WeightPage() {
     [data]
   );
 
-  // Chart data
+  // Chart data for @mui/x-charts/LineChart
   const chartData = useMemo(() => {
-    if (!data) return null;
-    const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
-    return {
-      labels: sorted.map((w) => w.date),
-      datasets: [
-        {
-          label: "Weight (kg)",
-          data: sorted.map((w) => w.weightKg),
-          fill: false,
-          borderColor: "#1976d2",
-          backgroundColor: "#1976d2",
-          tension: 0.2,
-        },
-      ],
-    };
+    if (!data) return [];
+    return [...data]
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((w) => ({
+        date: new Date(w.date),
+        weightKg: w.weightKg,
+      }));
   }, [data]);
-
-  // Chart options
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true },
-    },
-    scales: {
-      x: { title: { display: true, text: "Date" } },
-      y: { title: { display: true, text: "Kg" }, beginAtZero: false },
-    },
-  };
 
   // Form handlers
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,58 +98,81 @@ export default function WeightPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 600, mx: "auto", mt: 4, p: 2 }}>
-      <Typography variant="h5" align="center" gutterBottom>
+    <div className="min-w-[24rem] max-w-xl mt-8 font-roboto">
+      <h2 className="text-center pb-6 font-oswald text-3xl font-bold">
         Weight Evolution
-      </Typography>
-      <Box sx={{ mb: 2 }}>
+      </h2>
+      <div>
         {isLoading ? (
           <CircularProgress />
-        ) : chartData ? (
-          <Line data={chartData} options={chartOptions} />
+        ) : chartData.length > 0 ? (
+          <LineChart
+            xAxis={[
+              {
+                dataKey: "date",
+                label: "Date",
+                scaleType: "time",
+                valueFormatter: (date) => date.toISOString().slice(0, 10),
+              },
+            ]}
+            series={[
+              { dataKey: "weightKg", label: "Weight (kg)", color: "#1976d2" },
+            ]}
+            dataset={chartData}
+          />
         ) : (
           <Typography>No data yet.</Typography>
         )}
-      </Box>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleOutlineIcon />}
+      </div>
+      <div className="flex justify-center p-2 mb-4">
+        <button
+          className="cursor-pointer gap-1 flex items-center"
           onClick={() => setOpen(true)}
         >
-          Add Weight
-        </Button>
-      </Box>
-      <Typography variant="h6" gutterBottom>
-        Weight Logs
-      </Typography>
-      <List>
-        {data &&
-          [...data]
-            .sort((a, b) => b.date.localeCompare(a.date))
-            .map((w) => (
-              <ListItem key={w.id} divider>
-                <ListItemText
-                  primary={`${w.weightKg} kg`}
-                  secondary={
-                    <>
-                      <span>{w.date}</span>
-                      {w.notes && <span> — {w.notes}</span>}
-                    </>
+          <AddCircleOutlineIcon
+            fontSize="large"
+            className="transform rotate-90 "
+          />
+          Add measure
+        </button>
+      </div>
+      <div className="flex flex-col gap-6">
+        <h3 className="font-oswald text-3xl ml-3">Weight Logs</h3>{" "}
+        {data?.length > 0 ? (
+          <List>
+            {[...data]
+              .sort((a, b) => b.date.localeCompare(a.date))
+              .map((w) => (
+                <ListItem
+                  key={w.id}
+                  divider
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      color="error"
+                      onClick={() => deleteWeightMutation.mutate(w.id!)}
+                    >
+                      <DeleteOutline />
+                    </IconButton>
                   }
-                />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    color="error"
-                    onClick={() => deleteWeightMutation.mutate(w.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-      </List>
+                >
+                  <ListItemText
+                    primary={`${w.weightKg} kg`}
+                    secondary={
+                      <>
+                        <span>{w.date}</span>
+                        {w.notes && <span> — {w.notes}</span>}
+                      </>
+                    }
+                  />
+                </ListItem>
+              ))}
+          </List>
+        ) : (
+          <span> No data yet. Add a measure.</span>
+        )}
+      </div>
+
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box
           component="form"
@@ -213,6 +197,7 @@ export default function WeightPage() {
           </Typography>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
+              disableFuture
               label="Date"
               value={form.date}
               onChange={handleDateChange}
@@ -247,6 +232,6 @@ export default function WeightPage() {
           </Button>
         </Box>
       </Modal>
-    </Box>
+    </div>
   );
 }
