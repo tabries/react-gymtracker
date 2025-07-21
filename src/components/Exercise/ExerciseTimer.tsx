@@ -8,6 +8,15 @@ import { createHistoryEntry } from "@/services/api";
 import { useState } from "react";
 import { TextField, Typography } from "@mui/material";
 
+export interface History {
+  exercise: number;
+  date: Date; // YYYY-MM-DD
+  sets?: number;
+  reps?: number;
+  weightKg?: number;
+  durationMin: number;
+}
+
 const Timer = ({
   exerciseId,
   handleClose,
@@ -35,9 +44,9 @@ const Timer = ({
       await createHistoryEntry({
         exercise: exerciseId,
         date: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
-        sets: sets ? Number(sets) : null,
-        reps: reps ? Number(reps) : null,
-        weightKg: weightKg ? Number(weightKg) : null,
+        sets: sets ? Number(sets) : undefined,
+        reps: reps ? Number(reps) : undefined,
+        weightKg: weightKg ? Number(weightKg) : undefined,
         durationMin,
       });
       handleClose();

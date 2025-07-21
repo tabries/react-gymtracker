@@ -1,7 +1,13 @@
-import axios from "axios";
 import { useState } from "react";
 import { TextField, Button, Box, Typography } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createExercise } from "@/services/api";
+import type { Exercise } from "@/routes/exercises";
+
+export interface NewExercise extends Omit<Exercise, "id"> {
+  id?: number;
+}
 
 export const CreateExercise = ({
   routineId,
@@ -18,34 +24,36 @@ export const CreateExercise = ({
     reps: "",
     weight: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: createExerciseMutate,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: (exercise: NewExercise) => createExercise(exercise),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
+      handleClose();
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const port = import.meta.env.VITE_API_PORT || 8000;
-      await axios.post(`http://localhost:${port}/api/exercises/`, {
-        routine: routineId,
-        name: form.name,
-        description: form.description,
-        duration: form.duration ? Number(form.duration) : null,
-        sets: form.sets ? Number(form.sets) : null,
-        reps: form.reps ? Number(form.reps) : null,
-        weight: form.weight ? Number(form.weight) : null,
-      });
-      handleClose(true);
-    } catch (err) {
-      setError(`Error creating exercise ${err}`)
-    } finally {
-      setLoading(false);
-    }
+    createExerciseMutate({
+      routine: Number(routineId),
+      name: form.name,
+      description: form.description,
+      duration: form.duration ? Number(form.duration) : undefined,
+      sets: form.sets ? Number(form.sets) : undefined,
+      reps: form.reps ? Number(form.reps) : undefined,
+      weight: form.weight ? Number(form.weight) : undefined,
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   return (
@@ -74,17 +82,23 @@ export const CreateExercise = ({
           value={form.description}
           onChange={handleChange}
         />
-        {error && <Typography color="error">{error}</Typography>}
+        {isError && (
+          <Typography color="error">Error creating exercise</Typography>
+        )}
         <Box display="flex" gap={2} justifyContent="center">
           <Button
             variant="contained"
             color="primary"
             type="submit"
-            disabled={loading}
+            disabled={isPending}
           >
-            {loading ? "Saving..." : "Save"}
+            {isPending ? "Saving..." : "Save"}
           </Button>
-          <Button variant="outlined" onClick={() => handleClose()} disabled={loading}>
+          <Button
+            variant="outlined"
+            onClick={() => handleClose()}
+            disabled={isPending}
+          >
             Cancel
           </Button>
         </Box>

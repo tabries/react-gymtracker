@@ -1,14 +1,15 @@
 import { Exercise } from "@/components/Exercise/index";
-import axios from "axios";
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Modal from "@mui/material/Modal";
 import { CreateExercise } from "@/components/Exercise/CreateExercise";
+import { getExercises } from "@/services/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-interface Exercise {
+export interface Exercise {
   id: number;
-  routineId: number;
+  routine: number;
   name: string;
   description?: string;
   duration?: number;
@@ -20,41 +21,24 @@ interface Exercise {
 export const Exercises = () => {
   const location = useLocation();
   const { id: routineId, name: routineName } = location.state;
-
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown | null>(null);
+  const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = (reload?: boolean) => {
     if (reload) {
-      fetchExercises();
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
     }
     setOpen(false);
   };
 
-  const fetchExercises = useCallback(async () => {
-    const port = import.meta.env.VITE_API_PORT;
-    const api = axios.create({
-      baseURL: `http://localhost:${port}`,
-    });
-    try {
-      const response = await api.get(`/api/routines/${routineId}/exercises/`);
-      setExercises(response.data);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [routineId]);
+  const { data: exercises, isLoading, error } = useQuery({
+    queryKey: ["exercises"],
+    queryFn: () => getExercises().then((res) => res.data),
+  });
 
-  useEffect(() => {
-    fetchExercises();
-  }, [fetchExercises]);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error fetching routines</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error fetching exercises</div>;
 
   return (
     <div className="h-full w-[98%] flex flex-col justify-between">
@@ -65,7 +49,7 @@ export const Exercises = () => {
         </h1>
         {exercises.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {exercises.map((exercise) => (
+            {exercises.map((exercise: Exercise) => (
               <Exercise
                 key={exercise.id}
                 id={exercise.id}

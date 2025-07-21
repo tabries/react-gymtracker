@@ -1,7 +1,8 @@
-import axios from "axios";
 import { useState } from "react";
 import { Button, Box, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { deleteExercise } from "@/services/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const DeleteExercise = ({
   exerciseId,
@@ -10,24 +11,23 @@ export const DeleteExercise = ({
   exerciseId: number;
   handleClose: () => void;
 }) => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteExerciseMutate, isPending } = useMutation({
+    mutationFn: (id: number) => deleteExercise(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
+      handleClose();
+    },
+    onError: (err) => setError(`Error deleting exercise ${err}`),
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-    try {
-      const port = import.meta.env.VITE_API_PORT || 8000;
-      await axios.delete(
-        `http://localhost:${port}/api/exercises/${exerciseId}/`
-      );
-      handleClose();
-    } catch (err) {
-      setError(`Error creating exercise ${err}`);
-    } finally {
-      setLoading(false);
-    }
+    deleteExerciseMutate(exerciseId);
   };
 
   return (
@@ -52,11 +52,11 @@ export const DeleteExercise = ({
             variant="contained"
             color="primary"
             type="submit"
-            disabled={loading}
+            disabled={isPending}
           >
-            {loading ? "Deleting..." : "Delete"}
+            {isPending ? "Deleting..." : "Delete"}
           </Button>
-          <Button variant="outlined" onClick={handleClose} disabled={loading}>
+          <Button variant="outlined" onClick={handleClose} disabled={isPending}>
             Cancel
           </Button>
         </Box>
