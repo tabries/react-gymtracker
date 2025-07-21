@@ -17,13 +17,14 @@ import {
   type PickersDayProps,
 } from "@mui/x-date-pickers/PickersDay";
 
-interface History {
-  id: number;
-  exercise_name: string;
+export interface NewHistory {
+  id?: number;
+  exercise: number;
+  exercise_name?: string;
   date: string;
-  sets: number;
-  reps: number;
-  weightKg: number;
+  sets?: number;
+  reps?: number;
+  weightKg?: number;
   durationMin: number;
 }
 
@@ -44,13 +45,13 @@ export default function History() {
     enabled: !!formattedDate,
   });
 
-  const highlightedDays: number[] = historyByMonth?.map((history: History) => {
+  const highlightedDays: number[] = historyByMonth?.map((history: NewHistory) => {
     return new Date(history.date).getUTCDate();
   });
 
   const historySelectedDay = historyByMonth?.filter(
-    (history: History) =>
-      new Date(history.date).getDate() === selectedDate?.getDate()
+    (history: NewHistory) =>
+      new Date(history.date).getUTCDate() === selectedDate?.getUTCDate()
   );
 
   function ServerDay(props: PickersDayProps & { highlightedDays?: number[] }) {
@@ -58,7 +59,7 @@ export default function History() {
 
     const isSelected =
       !props.outsideCurrentMonth &&
-      highlightedDays.indexOf(props.day.getDate()) >= 0;
+      highlightedDays.indexOf(props.day.getUTCDate()) >= 0;
 
     // console.log('0001 highlightedDays', highlightedDays)
 
@@ -112,7 +113,7 @@ export default function History() {
         {historySelectedDay && historySelectedDay.length > 0 && (
           <div className="justify-self-start pl-4">
             <List>
-              {historySelectedDay.map((entry: History) => (
+              {historySelectedDay.map((entry: NewHistory) => (
                 <ListItem key={entry.id}>
                   <ListItemText
                     primary={entry.exercise_name}

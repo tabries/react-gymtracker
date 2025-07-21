@@ -20,7 +20,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getWeights, createWeight, deleteWeight } from "@/services/api";
 
-interface Weight {
+export interface Weight {
   id?: number;
   date: string;
   weightKg: number;
