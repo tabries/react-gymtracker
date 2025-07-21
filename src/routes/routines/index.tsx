@@ -1,51 +1,34 @@
 import { Routine } from "@/components/Routine/index";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Modal from "@mui/material/Modal";
 import { CreateRoutine } from "@/components/Routine/CreateRoutine";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRoutines } from "@/services/api";
 
-interface Routine {
+export interface Routine {
   id: number;
-  date: string;
   name: string;
 }
 
 export const Routines = () => {
-
-  const [routines, setRoutines] = useState<Routine[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown | null>(null);
-
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+
+  const { data: routines, isLoading, error } = useQuery({
+    queryKey: ["routines"],
+    queryFn: () => getRoutines().then((res) => res.data),
+  });
+
   const handleOpen = () => setOpen(true);
   const handleClose = (reload?: boolean) => {
     if (reload) {
-      fetchRoutines();
+      queryClient.invalidateQueries({ queryKey: ["routines"] });
     }
     setOpen(false);
   };
 
-  const fetchRoutines = async () => {
-    const port = import.meta.env.VITE_API_PORT;
-    const api = axios.create({
-      baseURL: `http://localhost:${port}`,
-    });
-    try {
-      const response = await api.get(`/api/routines/`);
-      setRoutines(response.data);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRoutines();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error fetching routines</div>;
 
   return (
@@ -54,7 +37,7 @@ export const Routines = () => {
         <h1 className="text-center pb-4 font-oswald text-3xl font-bold">Routines</h1>
         {routines.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {routines.map((routine) => (
+            {routines.map((routine: Routine) => (
               <Routine key={routine.id} id={routine.id} name={routine.name} />
             ))}
           </div>

@@ -1,7 +1,13 @@
-import axios from "axios";
 import { useState } from "react";
 import { TextField, Button, Box, Typography } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createRoutine } from "@/services/api";
+import type { Routine } from "@/routes/routines";
+
+ export interface NewRoutine extends Omit<Routine, "id"> {
+    id?: number;
+  }
 
 export const CreateRoutine = ({
   handleClose,
@@ -10,34 +16,25 @@ export const CreateRoutine = ({
 }) => {
   const [form, setForm] = useState({
     name: "",
-    description: "",
-    duration: "",
-    sets: "",
-    reps: "",
-    weight: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const queryClient = useQueryClient();
+
+  const { mutate: createRoutineMutate, isPending, isError } = useMutation({
+    mutationFn: (routine: NewRoutine) => createRoutine(routine),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["routines"] });
+      handleClose();
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const port = import.meta.env.VITE_API_PORT || 8000;
-      await axios.post(`http://localhost:${port}/api/routines/`, {
-        name: form.name,
-      });
-      handleClose(true);
-    } catch (err) {
-      setError(`Error creating exercise ${err}`);
-    } finally {
-      setLoading(false);
-    }
+    createRoutineMutate({name: form.name});
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   return (
@@ -60,17 +57,21 @@ export const CreateRoutine = ({
           onChange={handleChange}
           required
         />
-        {error && <Typography color="error">{error}</Typography>}
+        {isError && <Typography color="error">Error creating routine</Typography>}
         <Box display="flex" gap={2} justifyContent="center">
           <Button
             variant="contained"
             color="primary"
             type="submit"
-            disabled={loading}
+            disabled={isPending}
           >
-            {loading ? "Saving..." : "Save"}
+            {isPending ? "Saving..." : "Save"}
           </Button>
-          <Button variant="outlined" onClick={() => handleClose()} disabled={loading}>
+          <Button
+            variant="outlined"
+            onClick={() => handleClose()}
+            disabled={isPending}
+          >
             Cancel
           </Button>
         </Box>

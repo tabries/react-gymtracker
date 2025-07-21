@@ -1,7 +1,8 @@
-import axios from "axios";
 import { useState } from "react";
 import { Button, Box, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteRoutine } from "@/services/api";
 
 export const DeleteRoutine = ({
   routineId,
@@ -10,22 +11,23 @@ export const DeleteRoutine = ({
   routineId: number;
   handleClose: () => void;
 }) => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteRoutineMutate, isPending } = useMutation({
+    mutationFn: (id: number) => deleteRoutine(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["routines"] });
+      handleClose();
+    },
+    onError: (err) => setError(`Error deleting routine ${err}`),
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-    try {
-      const port = import.meta.env.VITE_API_PORT || 8000;
-      await axios.delete(`http://localhost:${port}/api/routines/${routineId}/`);
-      handleClose();
-    } catch (err) {
-      setError(`Error creating routine ${err}`);
-    } finally {
-      setLoading(false);
-    }
+    deleteRoutineMutate(routineId);
   };
 
   return (
@@ -50,11 +52,11 @@ export const DeleteRoutine = ({
             variant="contained"
             color="primary"
             type="submit"
-            disabled={loading}
+            disabled={isPending}
           >
-            {loading ? "Deleting..." : "Delete"}
+            {isPending ? "Deleting..." : "Delete"}
           </Button>
-          <Button variant="outlined" onClick={handleClose} disabled={loading}>
+          <Button variant="outlined" onClick={handleClose} disabled={isPending}>
             Cancel
           </Button>
         </Box>
