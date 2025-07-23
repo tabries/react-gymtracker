@@ -4,7 +4,7 @@ import type { NewHistory } from '@/routes/history';
 import type { Weight } from '@/routes/weight';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/';
+const API_URL = `${import.meta.env.VITE_BASE_API_URL}:${import.meta.env.VITE_API_PORT}/api/`
 
 const api = axios.create({
     baseURL: API_URL,
